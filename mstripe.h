@@ -207,54 +207,31 @@ mstripe_get(const struct mstripe *_cfg, json_t **_res, char const *_url, char co
     goto cleanup;
 }
 
-/* ------------------
- * --- OPERATIONS ---
- * ------------------ */
-
+/* -------------------------------
+ * ---- CONFIGURATION UTILITY ----
+ * ------------------------------- */
 static inline bool
-mstripe_customer_dashboard(const struct mstripe *_cfg,
-                           char const            _customer[],
-                           FILE                 *_fp_url,
-                           char const            _opt_return_url[]) {
-    char const *u     = "https://api.stripe.com/v1/billing_portal/sessions";
-    char const *k[20] = { NULL };
-    size_t      ksz   = 0;
-    json_t     *j     = NULL;
-    bool        r     = false;
-    char const *s;
-    int         e;
+mstripe_init(struct mstripe *_cfg) {
 
-    k[ksz++] = "customer";
-    k[ksz++] = _customer;
-    if (_opt_return_url) {
-        k[ksz++] = "return_url";
-        k[ksz++] = _opt_return_url;
-    }
-    k[ksz++] = NULL;
+    bool        rel  = (getenv("RELEASE_MODE"))?true:false;
+    char const *e_pk = (rel)?"STRIPE_PUBLIC_KEY":"STRIPE_TEST_PUBLIC_KEY";
+    char const *e_sk = (rel)?"STRIPE_SECRET_KEY":"STRIPE_TEST_SECRET_KEY";
+    char       *s_pk = NULL;
+    char       *s_sk = NULL;
+    char       *m_pk = NULL;
+    char       *m_sk = NULL;
     
+    if (!m_pk && (s_pk = getenv(e_pk))) m_pk = strdup(s_pk);
+    if (!m_sk && (s_sk = getenv(e_sk))) m_sk = strdup(s_sk);
+
+    if (!s_pk) { syslog(LOG_ERR, "Please set %s", e_pk); return false; }
+    if (!s_sk) { syslog(LOG_ERR, "Please set %s", e_sk); return false; }
+    if (!m_pk) { syslog(LOG_ERR, "Not enough memory");   return false; }
+    if (!m_sk) { syslog(LOG_ERR, "Not enough memory");   return false; }
     
-    e = mstripe_post(_cfg, &j, u, k);
-    if (!e/*err*/) return false;
-
-    s = json_string_value(json_object_get(j, "url"));
-    if (!s/*err*/) goto fail_response;
-
-    if (_fp_url) {
-        fputs(s, _fp_url);
-    }
-
-    r = true;
- cleanup:
-    json_decref(j);
-    return r;
- fail_response:
-    syslog(LOG_ERR, "Stripe returned an invalid response.");
-    goto cleanup;
+    _cfg->public_key = m_pk;
+    _cfg->secret_key = m_sk;
+    return true;
 }
-
-
-
-
-
 
 #endif

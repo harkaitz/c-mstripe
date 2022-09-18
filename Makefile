@@ -1,27 +1,29 @@
-DESTDIR =
-PREFIX  =/usr/local
-CC      =cc
-CFLAGS  =-Wall -g
-LIBS    =-lcurl -ljansson
-PROGRAM =mstripe
-HEADER  =mstripe.h
+DESTDIR  =
+PREFIX   =/usr/local
+CC       =cc
+CFLAGS   =-Wall -g
+LIBS     =-lcurl -ljansson
+PROGRAMS =\
+    prog/mstripe-customer \
+    prog/mstripe-language
+HEADERS  =mstripe.h mstripe-customer.h
 
 ##
-all: $(PROGRAM)
+all: $(PROGRAMS)
 clean:
-	@echo 'RM $(PROGRAM)'
-	@rm -f $(PROGRAM)
+	@echo 'RM $(PROGRAMS)'
+	@rm -f $(PROGRAMS)
 install: all
 	@echo 'I  $(DESTDIR)$(PREFIX)/bin/$(PROGRAM)'
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
-	@cp $(PROGRAM) $(DESTDIR)$(PREFIX)/bin
+	@cp $(PROGRAMS) $(DESTDIR)$(PREFIX)/bin
 	@echo 'I  $(DESTDIR)$(PREFIX)/include/$(HEADER)'
 	@mkdir -p $(DESTDIR)$(PREFIX)/include
-	@cp $(HEADER) $(DESTDIR)$(PREFIX)/include
+	@cp $(HEADERS) $(DESTDIR)$(PREFIX)/include
 
 ##
-$(PROGRAM): main.c mstripe.h
-	@echo 'CC main.c -> $(PROGRAM)'
+prog/%: prog/%.c $(HEADERS)
+	@echo 'CC $< -> $@'
 	@$(CC) -o $@ $< $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LIBS)
 ## -- license --
 ifneq ($(PREFIX),)
