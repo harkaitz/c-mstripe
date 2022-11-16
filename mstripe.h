@@ -10,7 +10,7 @@
 
 #include <curl/curl.h>
 #include <jansson.h>
-#include <urlencode.h>
+#include <str/urlencode.h>
 
 #include <stdbool.h>
 #include <stdlib.h>

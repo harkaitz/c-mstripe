@@ -26,11 +26,9 @@ prog/%: prog/%.c $(HEADERS)
 	@echo 'CC $< -> $@'
 	@$(CC) -o $@ $< $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LIBS)
 ## -- license --
-ifneq ($(PREFIX),)
 install: install-license
 install-license: LICENSE
 	@echo 'I share/doc/c-mstripe/LICENSE'
 	@mkdir -p $(DESTDIR)$(PREFIX)/share/doc/c-mstripe
 	@cp LICENSE $(DESTDIR)$(PREFIX)/share/doc/c-mstripe
-endif
 ## -- license --
